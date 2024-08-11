@@ -22,10 +22,10 @@ import AI.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('clear/', AI.views.clear),
-    path('message/send/', AI.views.send_message),
-    path('message/result', AI.views.get_message_results),
-    path('file/upload/function/', AI.views.upload_function_file),
-    path('file/upload/',AI.views.upload_file),
-    path('user/register/', AI.views.register),
-    path('user/login/', AI.views.login),
+    path('AI/message/send/', AI.views.send_message),
+    path('AI/message/result', AI.views.get_message_results),
+    path('AI/file/upload/function/', AI.views.upload_function_file),
+    path('AI/file/upload/',AI.views.upload_file),
+    path('AI/user/register/', AI.views.register),
+    path('AI/user/login/', AI.views.login),
 ]

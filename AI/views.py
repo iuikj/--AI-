@@ -107,7 +107,7 @@ def send_message(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            command_str = data['command']
+            command_str = data['command_message']
         except (KeyError, json.JSONDecodeError):
             return HttpResponseBadRequest("Invalid JSON data or missing 'command' parameter")
 
@@ -141,6 +141,7 @@ def send_message(request):
 @csrf_exempt
 def get_message_results(request):
     client = OpenAI()
+    response_data: dict = {}
     fresh_run_id = request.session["fresh_run_id"]
     thread_id = request.session["thread_id"]
     latest_assistant_message = None
@@ -149,10 +150,16 @@ def get_message_results(request):
             latest_assistant_message = message
 
     if latest_assistant_message:
+        response_data["code"] = 200
+        response_data["message"] = "成功生成回复"
+        response_data["data"] = [json.loads(latest_assistant_message.content[0].text.value)]
         print("输出回复:\n" + latest_assistant_message.content[0].text.value)
+        return JsonResponse(response_data)
     else:
+        response_data["code"] = 500,
+        response_data["message"] = "出现错误"
         print("未找到该助手的消息")
-    return HttpResponse("ok")
+        return JsonResponse(response_data)
 
 
 def clear(request):
@@ -205,7 +212,7 @@ def register(request):
 def login(request):
     def init_assistant_with_vector_store(u: Users):
         client = OpenAI()
-        assistants = Assistants.objects.select_related("user_id").all()
+        assistants = Assistants.objects.select_related("did").all()
 
         flag: bool = False
         for assistant in assistants:
@@ -227,22 +234,22 @@ def login(request):
                                                    "functionName": "fun",
                                                    "params": [
                                                        {
-                                                           "param1(参数1,与参数名一致)": {
+                                                           {
                                                                "paramName": "param1(参数名)",
                                                                "paramType": "参数类型",
                                                                "value": "参数的值"
                                                            }
                                                        },
                                                        {
-                                                           "param2(参数2)": {
+                                                            {
                                                                "paramName": "参数名称（对象）",
                                                                "paramType": "参数类型（对象）",
                                                                "value（对象参数的各成员变量的值）": {
-                                                                   "light": {
+                                                                   {
                                                                        "name": "light",
                                                                        "type": "int"
                                                                    },
-                                                                   "a": {
+                                                                   {
                                                                        "name": "a",
                                                                        "type": "str"
                                                                    }
