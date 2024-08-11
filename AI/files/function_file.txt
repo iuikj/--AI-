@@ -1,0 +1,2 @@
+{"class_name": "ACparams", "members": {"temperature": "int", "humidity": "int"}}
+{"function": {"name": "ac_contorll", "parameters": [{"name": "acparam", "type": "ACparams"}]}}
