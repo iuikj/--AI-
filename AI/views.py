@@ -162,12 +162,15 @@ def get_message_results(request):
         return JsonResponse(response_data)
 
 
-def clear(request):
+def clean(request):
     client = OpenAI()
-    all_assistant = client.beta.assistants.list()
-    for assistant in all_assistant:
-        if assistant.name == "模拟-智慧家庭AI助手-全屋助手":
-            client.beta.assistants.delete(assistant.id)
+    if request.GET["target"] == "assistant":
+        all_assistant = client.beta.assistants.list()
+        for assistant in all_assistant:
+            if assistant.name == "模拟-智慧家庭AI助手-全屋助手":
+                client.beta.assistants.delete(assistant.id)
+
+    Assistants.objects.filter(assistant_name="模拟-智慧家庭AI助手-全屋助手").delete()
 
     return HttpResponse(status=200)
 
@@ -212,7 +215,7 @@ def register(request):
 def login(request):
     def init_assistant_with_vector_store(u: Users):
         client = OpenAI()
-        assistants = Assistants.objects.select_related("did").all()
+        assistants = Assistants.objects.select_related("user_id").all()
 
         flag: bool = False
         for assistant in assistants:
@@ -244,16 +247,18 @@ def login(request):
                                                             {
                                                                "paramName": "参数名称（对象）",
                                                                "paramType": "参数类型（对象）",
-                                                               "value（对象参数的各成员变量的值）": {
+                                                               "values（对象参数的各成员变量的值）": [
                                                                    {
                                                                        "name": "light",
-                                                                       "type": "int"
+                                                                       "type": "int",
+                                                                       "value": 50
                                                                    },
                                                                    {
                                                                        "name": "a",
-                                                                       "type": "str"
+                                                                       "type": "str",
+                                                                       "value": "0"
                                                                    }
-                                                               }
+                                                               ]
                                                            }
                                                        }
                                                    ]
@@ -290,7 +295,6 @@ def login(request):
             )
             print("assistant id:", assistant.id)
             print("所属用户:", u.username)
-            # 这里好像出了点错，我的表连接外键时，好像对应模型必须是
             Assistants.objects.create(assistant_id=assistant.id, assistant_name=assistant.name,
                                       attached_vector_store_id=v,
                                       information="初始化的全屋智能助手", user_id=u)
@@ -310,6 +314,7 @@ def login(request):
             Threads.objects.create(
                 user_id=u,
                 thread_id=thread.id,
+                purpose="默认/全屋管家"
             )
 
     if request.method == "POST":

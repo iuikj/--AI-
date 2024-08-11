@@ -21,7 +21,7 @@ import AI.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('clear/', AI.views.clear),
+    path('AI/clean/', AI.views.clean),
     path('AI/message/send/', AI.views.send_message),
     path('AI/message/result', AI.views.get_message_results),
     path('AI/file/upload/function/', AI.views.upload_function_file),
