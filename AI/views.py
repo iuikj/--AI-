@@ -152,8 +152,26 @@ def get_message_results(request):
     if latest_assistant_message:
         response_data["code"] = 200
         response_data["message"] = "成功生成回复"
-        response_data["data"] = [json.loads(latest_assistant_message.content[0].text.value)]
         print("输出回复:\n" + latest_assistant_message.content[0].text.value)
+        result_message = latest_assistant_message.content[0].text.value
+
+        # 分解字符串为json数据交由后端去执行
+        start_marker: str = "`json"
+        end_marker: str = "`"
+        start_index: int = result_message.find(start_marker)
+        end_index: int
+        if start_index != -1:
+            start_index += len(start_marker)
+            # print(message_str[start_index:len(message_str)-1])
+            # end_index = message_str[start_index:len(message_str)-1].find(end_marker)
+            end_index = result_message.find(end_marker, start_index + len(start_marker))
+            if end_index != -1:
+                end_index -= len(end_marker)
+
+        parsed_message: str = result_message[start_index:end_index]
+        print(f"解析出来的字符串：{parsed_message}")
+        response_data["data"] = [json.loads(parsed_message)]
+
         return JsonResponse(response_data)
     else:
         response_data["code"] = 500,
@@ -322,24 +340,27 @@ def login(request):
             data = json.loads(request.body)
             username = data["username"]
             password = data["password"]
+            response_data: dict = {}
             user = Users.objects.get(username=username, password=password)
             if user is not None:
                 request.session["user_id"] = user.user_id
                 print(f"登录成功，用户：{user.username}")
-                result_data = {
-                    'result': '登录成功'
-                }
+
                 try:
                     init_assistant_with_vector_store(user)
                     init_thread(user)
                 except Exception as e:
                     print(f"初始化异常：{e}")
-                return JsonResponse(result_data)
+
+                response_data["code"] = 200
+                response_data["message"] = "登陆成功"
+                response_data["data"] = ""
+                return JsonResponse(response_data)
             else:
-                result_data = {
-                    'result': '登录失败'
-                }
+                response_data["code"] = 200
+                response_data["message"] = "登陆成功"
+                response_data["data"] = ""
                 print("登录失败，用户名或密码错误")
-                return JsonResponse(result_data)
+                return JsonResponse(response_data)
         except Exception as e:
             print(e)
