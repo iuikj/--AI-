@@ -364,3 +364,6 @@ def login(request):
                 return JsonResponse(response_data)
         except Exception as e:
             print(e)
+
+def ai_page(request):
+    return render(request, 'ai.html')

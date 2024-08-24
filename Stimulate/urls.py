@@ -28,4 +28,5 @@ urlpatterns = [
     path('AI/file/upload/',AI.views.upload_file),
     path('AI/user/register/', AI.views.register),
     path('AI/user/login/', AI.views.login),
+    path('AI/page',AI.views.ai_page)
 ]
