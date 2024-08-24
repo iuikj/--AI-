@@ -30,6 +30,7 @@ class Threads(models.Model):
     user_id = models.ForeignKey("Users", on_delete=models.CASCADE, null=True, blank=True)
     purpose = models.CharField(max_length=50)
 
+
 class Messages(models.Model):
     message_id = models.CharField(max_length=40, primary_key=True)
     thread_id = models.ForeignKey("Threads", on_delete=models.CASCADE)
