@@ -13,6 +13,14 @@ from openai import OpenAI
 from AI.models import *
 from Stimulate import settings
 
+# 使用rest_framework的相关包
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from .models import Users  #
+
 
 def upload_file(request):
     if request.method == 'GET':
@@ -179,16 +187,16 @@ def get_message_results(request):
         print("未找到该助手的消息")
         return JsonResponse(response_data)
 
-
+@csrf_exempt
 def clean(request):
     client = OpenAI()
     if request.GET["target"] == "assistant":
+        assistant_name=request.GET["target_name"]
         all_assistant = client.beta.assistants.list()
         for assistant in all_assistant:
-            if assistant.name == "模拟-智慧家庭AI助手-全屋助手":
+            if assistant.name == assistant_name:
                 client.beta.assistants.delete(assistant.id)
-
-    Assistants.objects.filter(assistant_name="模拟-智慧家庭AI助手-全屋助手").delete()
+        Assistants.objects.filter(assistant_name=assistant_name).delete()
 
     return HttpResponse(status=200)
 
@@ -213,7 +221,8 @@ def register(request):
             print(f"密码{password}\n")
             print(f"身份Id{random_string}\n")
 
-            Users.objects.create(username=username, password=password, user_id=random_string)
+            # Users.objects.create(username=username, password=password, user_id=random_string)
+            Users.objects.create_user(username=username,password=password,user_id=random_string)
             print("注册成功")
             result_data = {
                 'result': '注册成功'
@@ -336,34 +345,78 @@ def login(request):
             )
 
     if request.method == "POST":
-        try:
+        # try:
             data = json.loads(request.body)
             username = data["username"]
             password = data["password"]
+            print(f"尝试登录，用户名：{username}，密码：{password}")
+            # 使用authenticate方法验证用户名和密码，必须使用关键字参数，如：user = authenticate(username=username, password=password)
+            # Django 默认使用加密哈希来存储密码。如果在创建用户时未正确使用 set_password 方法设置密码，那么认证过程将无法匹配原始密码。
+            user = authenticate(username=username, password=password)
+            print(f"用户{user}尝试登录")
             response_data: dict = {}
-            user = Users.objects.get(username=username, password=password)
-            if user is not None:
-                request.session["user_id"] = user.user_id
+            if user:
+                print("开始验证token")
+                token, created = Token.objects.get_or_create(user=user)
+                print(token)
+                print(f"token:{token.key}")
+                # return HttpResponse({"token": token.key}, status=status.HTTP_200_OK)
                 print(f"登录成功，用户：{user.username}")
-
                 try:
                     init_assistant_with_vector_store(user)
                     init_thread(user)
                 except Exception as e:
                     print(f"初始化异常：{e}")
-
                 response_data["code"] = 200
                 response_data["message"] = "登陆成功"
-                response_data["data"] = ""
+                response_data["data"] = {"access_token": token.key}
                 return JsonResponse(response_data)
             else:
-                response_data["code"] = 200
-                response_data["message"] = "登陆成功"
+                response_data["code"] = status.HTTP_500_INTERNAL_SERVER_ERROR
+                response_data["message"] = "登陆失败"
                 response_data["data"] = ""
                 print("登录失败，用户名或密码错误")
                 return JsonResponse(response_data)
-        except Exception as e:
-            print(e)
+                return HttpResponse({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+        #     response_data: dict = {}
+        #     user = Users.objects.get(username=username, password=password)
+        #     if user is not None:
+        #
+        #         # request.session["user_id"] = user.user_id
+        #         # 使用token验证
+        #
+        #         print(f"登录成功，用户：{user.username}")
+        #
+        #         try:
+        #             init_assistant_with_vector_st`ore(user)
+        #             init_thread(user)
+        #         except Exception as e:
+        #             print(f"初始化异常：{e}")
+        #
+        #         response_data["code"] = 200
+        #         response_data["message"] = "登陆成功"
+        #         response_data["data"] = ""
+        #         return JsonResponse(response_data)
+        #     else:
+        #         response_data["code"] = 500
+        #         response_data["message"] = "登陆失败"
+        #         response_data["data"] = ""
+        #         print("登录失败，用户名或密码错误")
+        #         return JsonResponse(response_data)
+        # except Exception as e:
+        #     print(e)
+            return HttpResponse("done")
 
 def ai_page(request):
     return render(request, 'ai.html')
+
+def stream_ai_paser_page(request):
+    return render(request,'Stream_AI_parser.html')
+def fix_user(request):
+    from AI.models import Users
+
+    user = Users.objects.get(username="admin")
+    user.set_password("123")
+    user.save()
+    return HttpResponse("ok")

@@ -1,2 +1,113 @@
 {"class_name": "ACparams", "members": {"temperature": "int", "humidity": "int"}}
 {"function": {"name": "ac_contorll", "parameters": [{"name": "acparam", "type": "ACparams"}]}}
+{
+  "classes": [
+    {
+      "class_name": "ACparams",
+      "members": {
+        "temperature": "int",
+        "humidity": "int"
+      },
+      "description": "空调参数类，包含温度和湿度"
+    },
+    {
+      "class_name": "LightParams",
+      "members": {
+        "brightness": "int",
+        "color": "string"
+      },
+      "description": "灯光参数类，包含亮度和颜色"
+    },
+    {
+      "class_name": "LockParams",
+      "members": {
+        "status": "string"
+      },
+      "description": "门锁参数类，包含锁的状态（锁定或解锁）"
+    },
+    {
+      "class_name": "CurtainParams",
+      "members": {
+        "position": "int"
+      },
+      "description": "窗帘参数类，包含开合程度"
+    },
+    {
+      "class_name": "SecurityParams",
+      "members": {
+        "alarm": "bool",
+        "camera": "bool"
+      },
+      "description": "安全系统参数类，包含警报状态和监控摄像头状态"
+    },
+    {
+      "class_name": "TemperatureSensorParams",
+      "members": {
+        "current_temperature": "float"
+      },
+      "description": "温度传感器参数类，包含当前温度"
+    }
+  ],
+  "functions": [
+    {
+      "name": "ac_control",
+      "parameters": [
+        {
+          "name": "acParam",
+          "type": "ACparams"
+        }
+      ],
+      "description": "控制空调的函数，设置温度和湿度"
+    },
+    {
+      "name": "set_light",
+      "parameters": [
+        {
+          "name": "lightParam",
+          "type": "LightParams"
+        }
+      ],
+      "description": "控制灯光的函数，设置亮度和颜色"
+    },
+    {
+      "name": "control_lock",
+      "parameters": [
+        {
+          "name": "lockParam",
+          "type": "LockParams"
+        }
+      ],
+      "description": "控制门锁的函数，锁定或解锁门"
+    },
+    {
+      "name": "control_curtain",
+      "parameters": [
+        {
+          "name": "curtainParam",
+          "type": "CurtainParams"
+        }
+      ],
+      "description": "控制窗帘的函数，设置窗帘的开合程度"
+    },
+    {
+      "name": "control_security",
+      "parameters": [
+        {
+          "name": "securityParam",
+          "type": "SecurityParams"
+        }
+      ],
+      "description": "控制安全系统的函数，启用或禁用警报和摄像头"
+    },
+    {
+      "name": "read_temperature_sensor",
+      "parameters": [
+        {
+          "name": "sensorParam",
+          "type": "TemperatureSensorParams"
+        }
+      ],
+      "description": "读取温度传感器的函数，获取当前温度"
+    }
+  ]
+}

@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "AI.apps.AiConfig",
-    "channels"
+    "channels",
+    'corsheaders', # 跨域
+    "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -48,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # 跨域中间件
 ]
 
 ROOT_URLCONF = 'Stimulate.urls'
@@ -135,3 +139,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 ASGI_APPLICATION = 'Stimulate.asgi.application'
+
+# 配置REST framework的认证方式：
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# settings.py
+# REST framework中用于token认证的用户模型
+AUTH_USER_MODEL = 'AI.Users'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+CORS_ALLOWED_ORIGINS = [
+     "http://localhost:8081",
+]
+
+# 如果处理带有凭据的跨域请求（如登录请求带有Cookie）
+CORS_ALLOW_CREDENTIALS = True
